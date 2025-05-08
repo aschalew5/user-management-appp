@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'register.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -19,38 +20,18 @@ class _LoginPageState extends State<LoginPage> {
   bool rememberMe = false;
 
   Future<void> signInWithEmailAndPassword() async {
-    try {
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-        email: _controllerEmail.text.trim(),
-        password: _controllerPassword.text.trim(),
-      );
-
-      final userDoc = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userCredential.user!.uid)
-          .get();
-
-      if (userDoc.exists) {
-        final role = userDoc['role'];
-        if (role == 'admin') {
-          Navigator.pushReplacementNamed(context, '/admin');
-        } else {
-          Navigator.pushReplacementNamed(context, '/user');
-        }
-      } else {
-        setState(() {
-          errorMessage = 'No user document found!';
-          _errorMessage();
-        });
-      }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-        _errorMessage();
-      });
-    }
+  try {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: _controllerEmail.text.trim(),
+      password: _controllerPassword.text.trim(),
+    );
+  } on FirebaseAuthException catch (e) {
+    setState(() {
+      errorMessage = e.message;
+      _errorMessage();
+    });
   }
+}
 
   void _errorMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +138,6 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  // TODO: Replace with your password reset page
                                   Navigator.pushNamed(context, '/forgot-password');
                                 },
                                 child: const Text(

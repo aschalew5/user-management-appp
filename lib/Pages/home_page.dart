@@ -17,11 +17,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final User? user = Auth().currentUser;
   String currentUserRole = 'user';
-  bool showAllUsers = false;
 
   @override
   void initState() {
     super.initState();
+      print("HomePage loaded");
+
     fetchCurrentUserRole();
   }
 
@@ -39,10 +40,13 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
-
-  Future<void> signOut() async {
-    await Auth().signOut();
+Future<void> signOut() async {
+  await Auth().signOut();
+  if (mounted) {
+    Navigator.of(context).pushReplacementNamed('/login');
   }
+}
+
 
   Widget _title() => _userId();
 
@@ -50,10 +54,18 @@ class _HomePageState extends State<HomePage> {
 
   Widget _signOutButton() {
     return IconButton(
-        icon: const Icon(Icons.logout, size: 32.0),
-        tooltip: 'Logout',
-        onPressed: signOut);
+      
+  icon: const Icon(Icons.logout, size: 32.0),
+  tooltip: 'Logout',
+  onPressed: () async {
+    await FirebaseAuth.instance.signOut();
+    print("Logged out");
+    
+  },
+);
+
   }
+  
 
   Stream<List<Users>> readUsers() => FirebaseFirestore.instance
       .collection("Users")
@@ -72,18 +84,16 @@ class _HomePageState extends State<HomePage> {
 
   bool get isAdmin => currentUserRole == 'admin';
 
-  void onSearch(String search) {
-    setState(() {
-      _foundedUsers = _users.where((u) {
-        final matches = u.firstName.toLowerCase().startsWith(search.toLowerCase()) ||
-                        u.lastName.toLowerCase().startsWith(search.toLowerCase()) ||
-                        u.email.toLowerCase().startsWith(search.toLowerCase());
+ void onSearch(String search) {
+  setState(() {
+    _foundedUsers = _users.where((u) {
+      return u.firstName.toLowerCase().contains(search.toLowerCase()) ||
+             u.lastName.toLowerCase().contains(search.toLowerCase()) ||
+             u.email.toLowerCase().contains(search.toLowerCase());
+    }).toList();
+  });
+}
 
-        if (isAdmin) return matches;
-        return showAllUsers && matches;
-      }).toList();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,13 +131,11 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.hasData) {
             _users = snapshot.data!;
 
-            List<Users> visibleUsers = _users.where((u) {
-              if (isAdmin) return true;
-              if (!showAllUsers) return u.uid == user?.uid;
-              return false;
-            }).toList();
+            List<Users> visibleUsers = isAdmin
+    ? _users
+    : _users.where((u) => u.uid == user?.uid).toList();
 
-            final list = _foundedUsers.isNotEmpty ? _foundedUsers : visibleUsers;
+final list = _foundedUsers.isNotEmpty ? _foundedUsers : visibleUsers;
 
             return Container(
               color: Colors.white,
@@ -188,16 +196,7 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            FloatingActionButton(
-              heroTag: "btn2",
-              onPressed: () {
-                setState(() {
-                  showAllUsers = true;
-                });
-              },
-              backgroundColor: Colors.blueAccent,
-              child: const Icon(Icons.supervised_user_circle_sharp),
-            ),
+          
             if (isAdmin)
               FloatingActionButton(
                 heroTag: "btn1",

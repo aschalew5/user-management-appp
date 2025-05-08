@@ -197,17 +197,23 @@ class _ProfileState extends State<Profile> {
         actions: [
           ElevatedButton(
             child: const Text("Save"),
-            onPressed: () {
-              FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
-                'firstName': firstNameCtrl.text,
-                'lastName': lastNameCtrl.text,
-                'phoneNumber': phoneCtrl.text,
-                'adresse': addressCtrl.text,
-              }).then((_) {
-                Navigator.of(context).pop();
-                setState(() {});
-              });
-            },
+           onPressed: () {
+  FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
+    'firstName': firstNameCtrl.text,
+    'lastName': lastNameCtrl.text,
+    'phoneNumber': phoneCtrl.text,
+    'adresse': addressCtrl.text,
+  }).then((_) {
+    widget.user.firstName = firstNameCtrl.text;
+    widget.user.lastName = lastNameCtrl.text;
+    widget.user.phoneNumber = phoneCtrl.text;
+    widget.user.adresse = addressCtrl.text;
+
+    Navigator.of(context).pop();
+    setState(() {});
+  });
+},
+
           ),
         ],
       ),

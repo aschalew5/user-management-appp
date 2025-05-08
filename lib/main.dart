@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'firebase_options.dart';
 import 'Pages/login.dart';
 import 'Pages/home_page.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +12,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,18 +21,12 @@ class MyApp extends StatelessWidget {
       title: 'User Profile App',
       theme: ThemeData(
         primarySwatch: Colors.red,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      routes: {
-        '/login': (context) => const LoginPage(),
-        '/home': (context) =>  HomePage(),
-      },
-      home: const AuthChecker(), // 👈 Here
+      home: const AuthChecker(), // 🔥 This is the key
     );
   }
 }
 
-// 👇 Put this *after* MyApp or anywhere inside this file
 class AuthChecker extends StatelessWidget {
   const AuthChecker({super.key});
 
@@ -43,15 +35,21 @@ class AuthChecker extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
+        print(" Auth State: ${snapshot.connectionState} | User: ${snapshot.data?.email}");
+
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (snapshot.hasData) {
-          return  HomePage(); // Logged-in user
+          print("Redirecting to HomePage");
+          return  HomePage();
         }
 
-        return const LoginPage(); // Not logged in
+        print("Showing LoginPage");
+        return const LoginPage();
       },
     );
   }

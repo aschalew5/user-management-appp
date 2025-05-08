@@ -1,12 +1,12 @@
 class Users {
-  final String uid;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String phoneNumber;
-  final String adresse;
-  final String img;
-  final String role;
+  String uid;
+  String firstName;
+  String lastName;
+  String email;
+  String phoneNumber;
+  String adresse;
+  String img;
+  String role;
 
   Users({
     required this.uid,
