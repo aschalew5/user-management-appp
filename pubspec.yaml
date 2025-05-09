@@ -48,6 +48,10 @@ dev_dependencies:
 
 dependency_overrides:
   collection: ^1.17.0
+  shared_preferences: ^2.2.2
+  provider: ^6.1.2
+
+
 
 flutter:
   uses-material-design: true

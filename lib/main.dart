@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 import 'Pages/login.dart';
 import 'Pages/home_page.dart';
-import 'firebase_options.dart';
+import 'theme_notifier.dart';
+import 'themes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,13 +24,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = Provider.of<ThemeNotifier>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'User Profile App',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
-      ),
-      home: const AuthChecker(), // 🔥 This is the key
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeNotifier.themeMode,
+      home: const AuthChecker(),
     );
   }
 }
@@ -35,20 +45,10 @@ class AuthChecker extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        print(" Auth State: ${snapshot.connectionState} | User: ${snapshot.data?.email}");
-
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-
-        if (snapshot.hasData) {
-          print("Redirecting to HomePage");
-          return  HomePage();
-        }
-
-        print("Showing LoginPage");
+        if (snapshot.hasData) return HomePage(); // 👈 Navigates to HomePage
         return const LoginPage();
       },
     );
