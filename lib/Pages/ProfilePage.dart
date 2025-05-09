@@ -10,6 +10,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_flutter/qr_flutter.dart' as qr_flutter;
+import 'dart:convert';
+
+
 
 class Profile extends StatefulWidget {
   const Profile({super.key, required this.user});
@@ -47,6 +51,7 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -96,12 +101,13 @@ class _ProfileState extends State<Profile> {
               const SizedBox(height: 18),
               Text(widget.user.email),
               const SizedBox(height: 20),
+              buildQRCode(),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
-                    icon: const FaIcon(FontAwesomeIcons.phoneAlt),
+                    icon: const FaIcon(FontAwesomeIcons.phoneFlip),
                     onPressed: () async {
                       final Uri launchUri = Uri(
                         scheme: 'tel',
@@ -173,6 +179,34 @@ class _ProfileState extends State<Profile> {
       ),
     );
   }
+  Widget buildQRCode() {
+  final userData = {
+    'firstName': widget.user.firstName,
+    'lastName': widget.user.lastName,
+    'email': widget.user.email,
+    'role': widget.user.role,
+    'uid': widget.user.uid,
+  };
+  final jsonStr = jsonEncode(userData);
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      const SizedBox(height: 20),
+      const Text("Scan this QR to view user profile:"),
+      const SizedBox(height: 10),
+      
+      qr_flutter.QrImageView(
+        data: jsonStr,
+        version:qr_flutter.QrVersions.auto,
+        size: 100.0,
+        backgroundColor: Colors.white,
+
+      ),
+    ],
+  );
+}
+
 
   void _showEditProfileDialog(Users user) {
     final firstNameCtrl = TextEditingController(text: user.firstName);

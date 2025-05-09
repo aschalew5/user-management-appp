@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:user_profile_app/auth.dart';
 import 'package:user_profile_app/Pages/login.dart';
 import 'package:user_profile_app/Pages/home_page.dart';
-import 'package:user_profile_app/Pages/Admin/admin_dashboard.dart';
 
 class WidgetTree extends StatefulWidget {
   const WidgetTree({Key? key}) : super(key: key);
